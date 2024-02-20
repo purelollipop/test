@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .ele{
+            display: none;
+            position: fixed;
+            left: 50px;
+            top: 50px;
+        }
+    </style>
+</head>
+<body>
+<button id="but" class="ele">change</button>
+<select id="sel" class="ele">
+    <option>1</option>
+    <option>2</option>
+    <option>3</option>
+</select>
+<div id="div" style="position: relative; top: 1px;"></div>
+<div id="container" style="position: relative;">
+    <canvas id="canvas"></canvas>
+</div>
+</body>
+
+<script>
+    let but = document.getElementById("but");
+    let sel = document.getElementById("sel");
+    // let work = new Worker('./work3.js')
+    // console.log(work)
+    // work.postMessage(10)
+    // work.onmessage = (e) =>{
+    //     console.log(e)
+    // }
+    let data = [
+        {
+            name: "改动",
+            dataArr:[
+                1,2,3,4,5
+            ],
+        },
+        {
+            name: "好地方",
+            dataArr:[
+                21,22,23,24,25
+            ],
+        },
+        {
+            name: "和人",
+            dataArr:[
+                31,32,33,34,35
+            ],
+        }
+    ];
+    let dataHeader = ['姓名'];
+    console.time()
+    let ii = 30
+    for (let i = 1; i < ii; i++) {
+        dataHeader[i] = `数字${i}`
+    }
+    for (let i = 4; i < 500; i++) {
+        let name =  `改动${i}`
+        let dataArr = []
+        for (let j = 0; j < ii; j++) {
+            dataArr.push(`${name}-${j}`)
+        }
+        data.push({
+            name: name,
+            dataArr:dataArr
+        })
+    }
+    console.timeEnd()
+    let div = document.querySelector('#div');
+    let canvas = document.getElementById("canvas");
+    let context = canvas.getContext("2d");
+
+    let boxW = 100, boxH = 50;
+    canvas.width = dataHeader.length*boxW;
+    canvas.height = (data.length + 1) * boxH;
+    canvas.style.border = '1px solid #DEE0E3';
+    // 设置文字格式
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    setTable();
+    setCanvas()
+
+    function setTable(){
+        // 画出表格头线条
+        context.font = "16px Arial";
+        context.translate(0.5,0.5);
+        context.lineWidth =1;
+        context.globalAlpha  = 1;
+        for (let i = 0; i < dataHeader.length; i++) {
+            if(i === dataHeader.length-1){
+                break
+            }
+            context.moveTo((i+1) * boxW, 0);
+            context.lineTo((i+1) * boxW, canvas.height);
+        }
+        //画出表格体线条
+        for (let i = 0; i < data.length + 2; i++) {
+            context.moveTo(0, i * boxH);
+            context.lineTo(canvas.width, i * boxH);
+        }
+        // context.globalAlpha  = 0.2;
+
+    }
+
+    function setCanvas() {
+        // 表格头文字
+        for (let i = 0; i < dataHeader.length; i++) {
+            context.fillText(dataHeader[i], boxW * i + boxW / 2, boxH / 2);
+        }
+
+        // 表格体文字
+        context.font = "14px Arial";
+        for (let i = 0; i < data.length; i++) {
+            for (let j = 0; j < data[i].dataArr.length; j++) {
+                if(!j){
+                    // context.strokeStyle = '#000';
+                    context.fillStyle="#000";
+                    context.fillText(data[i].dataArr[j], boxW * j + boxW / 2, boxH * i + boxH + boxH / 2);
+                }else{
+                    let num = 0
+                    if(typeof data[i].dataArr[j] === 'string'){
+                        num = data[i].dataArr[j].split("-")[1]*1
+                    }else{
+                        num = data[i].dataArr[j]
+                    }
+
+                    // context.moveTo(boxW * j, boxH * i + boxH + boxH / 2);
+                    // context.lineTo(boxW * j + num, boxH * i + boxH + boxH / 2);
+                    if(num <= 5){
+                        context.fillStyle="#FF0000";
+                    }else if(num <= 15){
+                        context.fillStyle="#C3A0DB";
+                    }else{
+                        context.fillStyle="#A3EA98";
+                    }
+                    context.fillRect(boxW * j, boxH * i + boxH + boxH / 2,num,10);
+                    context.fillText(`${num}%`, boxW * j + boxW / 2 + num, boxH * i + boxH + boxH / 2);
+                }
+                // context.strokeStyle = "#222";
+                // context.strokeStyle = "#ff0000";
+            }
+        }
+        context.stroke();
+        context.restore();
+    }
+
+
+    let lastX,lastY; // 还原方式重绘存储上次点击事件信息
+    // 绑定点击事件
+    canvas.addEventListener('click', function (evt) {
+        let x = Math.floor(evt.offsetX / boxW); // 获取点击的位置，转换成按钮的 X索引
+        let y = Math.floor(evt.offsetY / boxH); // 获取点击的位置，转换成按钮的 Y索引
+        /**
+         * // 全部重绘逻辑
+         * // context.clearRect(0, 0, 999, 999); // 清楚canvas，重绘
+         * // setCanvas(); // 重绘
+         * // 全部重绘逻辑结束
+         */
+        // 还原的方式重绘逻辑 减少内存消耗
+        // （每次只删除添加的边框，并不删除重绘整个canvas）
+        // if (lastX >= 0 && lastY >= 0) {
+        //     let newX = boxW * lastX;
+        //     let newY = boxH * lastY;
+        //     context.clearRect(newX + 1, newY + 1, 1, boxH - 2);
+        //     context.clearRect(newX + 1, newY + 1, boxW - 2, 1);
+        //     context.clearRect(newX + boxW - 2, newY + 1, 1, boxH - 2);
+        //     context.clearRect(newX + 1, newY + boxH - 2, boxW - 2, 1);
+        // }
+        lastX = evt.offsetX;
+        lastY = evt.offsetY;
+
+        // 重绘逻辑结束
+        console.log(x,y)
+        console.log(lastX,lastY)
+        console.log(evt)
+        // 绘制点击的边框
+        // context.strokeRect(boxW * x + 1, boxH * y + 1, boxW - 2, boxH - 2)
+        but.style.display = "block"
+        // but.style.position = "absolute"
+        // console.log(but.style)
+        but.style.left = lastX+"px"
+        but.style.top = lastY+"px"
+
+        data.forEach((item, index) => { // 循环获取data对象中点击的数据
+            if (index === y - 1) {
+                item && Object.keys(item).forEach((itemData, i) => {
+                    if (i === x) {
+                        div.style.left = boxW * dataHeader.length + 20 + 'px';
+                        div.innerHTML = item[itemData];
+                    }
+                })
+            }
+        })
+    })
+    
+
+
+
+</script>
+</html>
