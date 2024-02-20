@@ -154,24 +154,9 @@
     let lastX,lastY; // 还原方式重绘存储上次点击事件信息
     // 绑定点击事件
     canvas.addEventListener('click', function (evt) {
-        let x = Math.floor(evt.offsetX / boxW); // 获取点击的位置，转换成按钮的 X索引
-        let y = Math.floor(evt.offsetY / boxH); // 获取点击的位置，转换成按钮的 Y索引
-        /**
-         * // 全部重绘逻辑
-         * // context.clearRect(0, 0, 999, 999); // 清楚canvas，重绘
-         * // setCanvas(); // 重绘
-         * // 全部重绘逻辑结束
-         */
-        // 还原的方式重绘逻辑 减少内存消耗
-        // （每次只删除添加的边框，并不删除重绘整个canvas）
-        // if (lastX >= 0 && lastY >= 0) {
-        //     let newX = boxW * lastX;
-        //     let newY = boxH * lastY;
-        //     context.clearRect(newX + 1, newY + 1, 1, boxH - 2);
-        //     context.clearRect(newX + 1, newY + 1, boxW - 2, 1);
-        //     context.clearRect(newX + boxW - 2, newY + 1, 1, boxH - 2);
-        //     context.clearRect(newX + 1, newY + boxH - 2, boxW - 2, 1);
-        // }
+        let x = Math.floor(evt.offsetX / boxW); // 获取X
+        let y = Math.floor(evt.offsetY / boxH); // 获取Y
+
         lastX = evt.offsetX;
         lastY = evt.offsetY;
 
